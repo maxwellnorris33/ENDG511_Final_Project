@@ -104,7 +104,7 @@ class ASL_vision_gui(ttk.Frame):
             pil_image_final = Image.fromarray(np.uint8(pil_image_normalized * 255))  # Convert back to PIL image for display
 
             # Convert the image for Tkinter and display it
-            imgtk = ImageTk.PhotoImage(image=pil_image_final)
+            imgtk = ImageTk.PhotoImage(image=pil_image)
             self.panel.imgtk = imgtk
             self.panel.config(image=imgtk)
 
