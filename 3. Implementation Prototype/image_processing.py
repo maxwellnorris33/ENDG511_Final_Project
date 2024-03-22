@@ -66,10 +66,10 @@ class ASL_vision_gui(ttk.Frame):
             for hand_landmarks in results.multi_hand_landmarks:
                 # Calculate the bounding box for the hand
                 h, w, _ = frame.shape
-                x_min = min([landmark.x for landmark in hand_landmarks.landmark]) * w
-                x_max = max([landmark.x for landmark in hand_landmarks.landmark]) * w
-                y_min = min([landmark.y for landmark in hand_landmarks.landmark]) * h
-                y_max = max([landmark.y for landmark in hand_landmarks.landmark]) * h
+                x_min = min([landmark.x for landmark in hand_landmarks.landmark]) * w *1/1.2
+                x_max = max([landmark.x for landmark in hand_landmarks.landmark]) * w  *1.2
+                y_min = min([landmark.y for landmark in hand_landmarks.landmark]) * h *1/1.2
+                y_max = max([landmark.y for landmark in hand_landmarks.landmark]) * h *1.2
 
                 # Adjust the bounding box
                 buffer = 30
@@ -130,16 +130,27 @@ class ASL_vision_gui(ttk.Frame):
             self.y_pred = self.model.predict(self.imgArray.values.reshape(-1, 28, 28, 1))
             self.predicted_class = self.labels[np.argmax(self.y_pred, axis = 1)[0]]
             
-            print(f'PREDICTION: {self.predicted_class}')
+            #self.imgArray.to_csv(r'C:\Users\khanh\Documents\ENGG\ENDG511\Project\ENDG511_Final_Project\3. Implementation Prototype\handpic.csv')
+            
+            print(self.predicted_class)
             
             #this is for plotting it in in grayscale bw to see the pixellated image
             
-            # fig, ax = plt.subplots()
-            # self.imgArray = self.imgArray*255
-            # i=self.imgArray.to_numpy()
-            # i=i.reshape((28,28))
-            # ax.imshow(i, cmap = 'gray')
-            # plt.show()
+            fig, ax = plt.subplots()
+            self.imgArray = self.imgArray*255
+            i=self.imgArray.to_numpy()
+            i=i.reshape((28,28))
+            ax.imshow(i, cmap = 'gray')
+            plt.show()
+            
+            # Convert the NumPy array back to a PIL Image object
+            # image_to_save = Image.fromarray(np.uint8(self.current_hand_region * 255))
+
+            # # Save the PIL Image
+            # cropped_image_path = os.path.join(self.output_path, f"hand_crop_{self.image_counter}.png")
+            # image_to_save.save(cropped_image_path)
+            # logging.info(f"Saved cropped hand region to {cropped_image_path}")
+            # self.image_counter += 1
 
         else:
             logging.info("No hand region to save")
