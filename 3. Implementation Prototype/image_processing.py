@@ -43,7 +43,7 @@ class ASL_vision_gui(ttk.Frame):
         parent.protocol('WM_DELETE_WINDOW', self.destructor)
 
         #load in model
-        self.model = tf.keras.models.load_model(f'stripClust_signLang_model_0.75_32.h5')
+        self.model = tf.keras.models.load_model(f'trained_signLang_model_copy.h5')
         self.model.compile(optimizer='rmsprop', # I chose this because adam would not work
               loss = 'categorical_crossentropy', 
               metrics = ['accuracy'])
