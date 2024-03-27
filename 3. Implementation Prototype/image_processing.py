@@ -43,7 +43,7 @@ class ASL_vision_gui(ttk.Frame):
         parent.protocol('WM_DELETE_WINDOW', self.destructor)
 
         #load in model
-        self.model = tf.keras.models.load_model(f'trained_signLang_model_copy.h5')
+        self.model = tf.keras.models.load_model(f'C:/Users/Maxwell Norris/Documents/ENDG511_Final_Project/3. Implementation Prototype/trained_signLang_model_20240322.h5')
         self.model.compile(optimizer='rmsprop', # I chose this because adam would not work
               loss = 'categorical_crossentropy', 
               metrics = ['accuracy'])
@@ -102,7 +102,7 @@ class ASL_vision_gui(ttk.Frame):
                 hand_region_array = np.asarray(hand_region_bw)
 
                 # Normalize the pixel values by dividing by 255.0
-                self.current_hand_region = hand_region_array / 255.0
+                self.current_hand_region = (hand_region_array + 0) / 255.0
             else:
                 self.current_hand_region = None
 
@@ -136,12 +136,12 @@ class ASL_vision_gui(ttk.Frame):
             
             #this is for plotting it in in grayscale bw to see the pixellated image
             
-            fig, ax = plt.subplots()
-            self.imgArray = self.imgArray*255
-            i=self.imgArray.to_numpy()
-            i=i.reshape((28,28))
-            ax.imshow(i, cmap = 'gray')
-            plt.show()
+            # fig, ax = plt.subplots()
+            # self.imgArray = self.imgArray*255
+            # i=self.imgArray.to_numpy()
+            # i=i.reshape((28,28))
+            # ax.imshow(i, cmap = 'gray')
+            # plt.show()
             
             # Convert the NumPy array back to a PIL Image object
             # image_to_save = Image.fromarray(np.uint8(self.current_hand_region * 255))
