@@ -2,7 +2,7 @@ import logging
 import cv2
 import mediapipe as mp
 import os
-from PIL import Image, ImageTk, ImageOps
+from PIL import Image, ImageTk, ImageOps, ImageDraw, ImageFont
 import tkinter as tk
 from tkinter import ttk
 import numpy as np
@@ -37,7 +37,9 @@ class ASL_vision_gui(ttk.Frame):
         
         # Label for displaying the image
         self.panel = ttk.Label(self)
-        self.panel.grid(padx=10, pady=10)
+        self.panel.grid(padx=1, pady=1)
+        
+        self.pil_font = ImageFont.truetype("arial.ttf", 30)
 
         # Destructor function to release resources
         parent.protocol('WM_DELETE_WINDOW', self.destructor)
@@ -84,13 +86,13 @@ class ASL_vision_gui(ttk.Frame):
         if ok:
             # Convert to RGB and create a PIL image
             cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            pil_image = Image.fromarray(cv2image)
+            self.pil_image = Image.fromarray(cv2image)
 
             # Detect hand and process the image
             result = self.hand_detection_function(cv2image)
             if result:
                 x_min, y_min, x_max, y_max = result
-                hand_region = pil_image.crop((x_min, y_min, x_max, y_max))
+                hand_region = self.pil_image.crop((x_min, y_min, x_max, y_max))
 
                 # Resize the cropped hand region to 28x28 pixels
                 hand_region_resized = hand_region.resize((28, 28), Image.LANCZOS)
@@ -107,21 +109,22 @@ class ASL_vision_gui(ttk.Frame):
                 self.current_hand_region = None
 
             # Resize, convert to grayscale, and normalize the full image for display
-            pil_image_resized = pil_image.resize((28, 28), Image.LANCZOS)
+            pil_image_resized = self.pil_image.resize((28, 28), Image.LANCZOS)
             pil_image_bw = pil_image_resized.convert('L')
             pil_image_normalized = np.asarray(pil_image_bw) / 255.0
             pil_image_final = Image.fromarray(np.uint8(pil_image_normalized * 255))  # Convert back to PIL image for display
-
-            # Convert the image for Tkinter and display it
-            imgtk = ImageTk.PhotoImage(image=pil_image)
-            self.panel.imgtk = imgtk
-            self.panel.config(image=imgtk)
             
             #evaluate the model
             self.evaluate_current_image()
             
+            # Convert the image for Tkinter and display it
+            imgtk = ImageTk.PhotoImage(image=self.pil_image)
+            self.panel.imgtk = imgtk
+            self.panel.config(image=imgtk)
+            
+            
         # Schedule the next frame read
-        self.after(100, self.video_loop)
+        self.after(30, self.video_loop)
 
     def evaluate_current_image(self, event=None):
         if self.current_hand_region is not None:
@@ -129,28 +132,10 @@ class ASL_vision_gui(ttk.Frame):
             self.imgArray = pd.DataFrame(self.current_hand_region)
             self.y_pred = self.model.predict(self.imgArray.values.reshape(-1, 28, 28, 1))
             self.predicted_class = self.labels[np.argmax(self.y_pred, axis = 1)[0]]
-            
-            #self.imgArray.to_csv(r'C:\Users\khanh\Documents\ENGG\ENDG511\Project\ENDG511_Final_Project\3. Implementation Prototype\handpic.csv')
-            
-            print(self.predicted_class)
-            
-            #this is for plotting it in in grayscale bw to see the pixellated image
-            
-            fig, ax = plt.subplots()
-            self.imgArray = self.imgArray*255
-            i=self.imgArray.to_numpy()
-            i=i.reshape((28,28))
-            ax.imshow(i, cmap = 'gray')
-            plt.show()
-            
-            # Convert the NumPy array back to a PIL Image object
-            # image_to_save = Image.fromarray(np.uint8(self.current_hand_region * 255))
 
-            # # Save the PIL Image
-            # cropped_image_path = os.path.join(self.output_path, f"hand_crop_{self.image_counter}.png")
-            # image_to_save.save(cropped_image_path)
-            # logging.info(f"Saved cropped hand region to {cropped_image_path}")
-            # self.image_counter += 1
+            #add text
+            draw = ImageDraw.Draw(self.pil_image)
+            draw.text((20, 20), self.predicted_class, font=self.pil_font, fill='aqua')
 
         else:
             logging.info("No hand region to save")
